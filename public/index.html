@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MyMemory Translator</title>
+</head>
+<body>
+  <h1>English ↔ French Translator</h1>
+
+  <textarea id="inputText" rows="4" cols="50" placeholder="Type something..."></textarea>
+  <br><br>
+
+  <select id="sourceLang">
+    <option value="en">English</option>
+    <option value="fr">French</option>
+  </select>
+  →
+  <select id="targetLang">
+    <option value="fr">French</option>
+    <option value="en">English</option>
+  </select>
+  <br><br>
+
+  <button id="translateBtn">Translate</button>
+  <p><b>Result:</b> <span id="result"></span></p>
+
+  <!-- JavaScript placed at the end to ensure HTML elements are loaded -->
+  <script>
+    // Select the button
+    const button = document.getElementById("translateBtn");
+
+    // Add click event listener
+    button.addEventListener("click", async () => {
+      const text = document.getElementById("inputText").value;
+      const source = document.getElementById("sourceLang").value;
+      const target = document.getElementById("targetLang").value;
+
+      if (!text) {
+        alert("Please type some text to translate!");
+        return;
+      }
+
+      try {
+        const response = await fetch("/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, source, target })
+        });
+
+        const data = await response.json();
+        document.getElementById("result").innerText = data.translatedText;
+      } catch (err) {
+        console.error("Error fetching translation:", err);
+        alert("Translation failed. Check console for details.");
+      }
+    });
+  </script>
+</body>
+</html>
