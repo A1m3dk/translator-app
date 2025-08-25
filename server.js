@@ -3,7 +3,9 @@ const axios = require("axios");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+
+// Use the port Render provides, fallback to 3000 for local testing
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
@@ -11,7 +13,7 @@ app.use(express.json());
 // Translate endpoint using MyMemory
 app.post("/translate", async (req, res) => {
   const { text, source, target } = req.body;
-  console.log("Received request:", text, source, target); // <-- ADD THIS
+  console.log("Received request:", text, source, target);
 
   if (!text) return res.status(400).json({ error: "No text provided" });
 
@@ -20,7 +22,7 @@ app.post("/translate", async (req, res) => {
 
   try {
     const response = await axios.get(url);
-    console.log("API response:", response.data); // <-- ADD THIS
+    console.log("API response:", response.data);
     const translatedText = response.data.responseData.translatedText;
     res.json({ translatedText });
   } catch (err) {
@@ -29,7 +31,6 @@ app.post("/translate", async (req, res) => {
   }
 });
 
-
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
