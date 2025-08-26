@@ -7,22 +7,59 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f4f6f9;
       text-align: center;
-      margin-top: 50px;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .box {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
     }
     textarea {
-      width: 80%;
+      width: 100%;
       height: 100px;
-      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      resize: none;
     }
     button, select {
       margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     #output {
-      margin-top: 20px;
-      font-weight: bold;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 18px;
+      min-height: 60px;
+      background: #eaf2ff;
+      text-align: left;
+      white-space: pre-wrap;
     }
     footer {
       margin-top: 50px;
@@ -34,24 +71,47 @@
 <body>
   <h1>🌍 Lingo Translate</h1>
 
-  <!-- Input box -->
-  <textarea id="text" placeholder="Type or speak something..."></textarea><br>
+  <!-- Input Box -->
+  <div class="box">
+    <textarea id="text" placeholder="Type or speak something..."></textarea><br>
 
-  <!-- Language selector for microphone -->
-  <label for="speechLang">🎤 Speak in: </label>
-  <select id="speechLang">
-    <option value="en-US">English</option>
-    <option value="fr-FR">Français</option>
-  </select>
+    <!-- Translation dropdowns -->
+    <label for="fromLang">Translate from: </label>
+    <select id="fromLang">
+      <option value="en">English</option>
+      <option value="fr">French</option>
+      <option value="es">Spanish</option>
+      <option value="de">German</option>
+    </select>
 
-  <!-- Microphone button -->
-  <button id="micBtn" onclick="startListening()">🎤 Speak</button>
-  
-  <!-- Translate button -->
-  <button onclick="translateText()">Translate</button>
+    <label for="toLang">to: </label>
+    <select id="toLang">
+      <option value="fr">French</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="de">German</option>
+    </select>
+    <br><br>
 
-  <p>Output:</p>
-  <div id="output"></div>
+    <!-- Microphone -->
+    <label for="speechLang">🎤 Speak in: </label>
+    <select id="speechLang">
+      <option value="en-US">English</option>
+      <option value="fr-FR">Français</option>
+      <option value="es-ES">Español</option>
+      <option value="de-DE">Deutsch</option>
+    </select>
+    <br><br>
+
+    <button id="micBtn" onclick="startListening()">🎤 Speak</button>
+    <button onclick="translateText()">Translate</button>
+  </div>
+
+  <!-- Output Box -->
+  <div class="box">
+    <h3>Translation:</h3>
+    <div id="output"></div>
+  </div>
 
   <footer>Made by Ahmed Khan</footer>
 
@@ -72,13 +132,11 @@
       recognition.interimResults = false;
 
       recognition.start();
-      console.log("🎙 Listening started");
       micBtn.innerText = "🎙 Listening...";
 
       recognition.onresult = function(event) {
         const spokenText = event.results[0][0].transcript;
         document.getElementById("text").value = spokenText;
-        console.log("✅ Heard: " + spokenText);
       };
 
       recognition.onerror = function(event) {
@@ -88,18 +146,20 @@
 
       recognition.onend = function() {
         micBtn.innerText = "🎤 Speak";
-        console.log("🛑 Listening stopped");
       };
     }
 
-    // 🌍 Translation function
     async function translateText() {
       const text = document.getElementById("text").value;
+      const from = document.getElementById("fromLang").value;
+      const to = document.getElementById("toLang").value;
+
       if (!text) {
         alert("Please enter or speak some text first!");
         return;
       }
-      const response = await fetch(`/translate?q=${encodeURIComponent(text)}&langpair=en|fr`);
+
+      const response = await fetch(`/translate?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
       const data = await response.json();
       document.getElementById("output").innerText = data.responseData.translatedText;
     }
