@@ -11,6 +11,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .container {
       background: white;
@@ -27,13 +28,27 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
+    textarea {
+      resize: none; /* stop resizing */
+    }
     #output {
-      margin-top: 15px;
+      margin: 20px auto 0 auto;
       background: #f0f0f0;
       padding: 15px;
       border-radius: 10px;
       min-height: 60px;
-      text-align: left;
+      width: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    .pressed {
+      background-color: #4CAF50;
+      color: white;
     }
     footer {
       margin-top: 15px;
@@ -48,6 +63,7 @@
     
     <textarea id="inputText" placeholder="Type or speak something..."></textarea>
     
+    <label>Translate From:</label>
     <select id="fromLang">
       <option value="en">English</option>
       <option value="es">Spanish</option>
@@ -56,6 +72,7 @@
       <option value="ar">Arabic</option>
     </select>
     
+    <label>Translate To:</label>
     <select id="toLang">
       <option value="es">Spanish</option>
       <option value="en">English</option>
@@ -64,7 +81,16 @@
       <option value="ar">Arabic</option>
     </select>
     
-    <button onclick="translateText()">Translate</button>
+    <label>Speak In (Mic Language):</label>
+    <select id="micLang">
+      <option value="en-US">English</option>
+      <option value="es-ES">Spanish</option>
+      <option value="de-DE">German</option>
+      <option value="fr-FR">French</option>
+      <option value="ar-SA">Arabic</option>
+    </select>
+    
+    <button id="translateBtn" onclick="translateText()">Translate</button>
     <button id="micButton">🎤 Speak</button>
     
     <div id="output">Translation will appear here...</div>
@@ -74,12 +100,16 @@
 
   <script>
     async function translateText() {
+      const btn = document.getElementById("translateBtn");
+      btn.classList.add("pressed");
+
       const inputText = document.getElementById("inputText").value;
       const fromLang = document.getElementById("fromLang").value;
       const toLang = document.getElementById("toLang").value;
 
       if (!inputText) {
         document.getElementById("output").innerText = "Please enter text.";
+        btn.classList.remove("pressed");
         return;
       }
 
@@ -89,6 +119,8 @@
         document.getElementById("output").innerText = data.responseData.translatedText;
       } catch (error) {
         document.getElementById("output").innerText = "Error: " + error;
+      } finally {
+        btn.classList.remove("pressed");
       }
     }
 
@@ -115,18 +147,13 @@
 
     micButton.addEventListener("click", () => {
       if (recognition) {
-        const langMap = {
-          "en": "en-US",
-          "es": "es-ES",
-          "de": "de-DE",
-          "fr": "fr-FR",
-          "ar": "ar-SA"
-        };
-        recognition.lang = langMap[document.getElementById("fromLang").value] || "en-US";
+        micButton.classList.add("pressed");
+        recognition.lang = document.getElementById("micLang").value;
         
         recognition.start();
         micButton.innerText = "🎤 Listening...";
         recognition.onend = () => {
+          micButton.classList.remove("pressed");
           micButton.innerText = "🎤 Speak";
         };
       }
