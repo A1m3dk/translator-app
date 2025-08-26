@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LinGO Translator 🌍</title>
+  <title>LinGO 🌍 Translate</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,25 +20,36 @@
       box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
       width: 420px;
       text-align: center;
-      position: relative; /* needed for bottom-right button */
+      position: relative;
     }
     h1 {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-size: 28px;
     }
-    select, textarea, button {
-      margin: 10px 0;
+    textarea {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      resize: none;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
       box-sizing: border-box;
     }
-    textarea {
-      resize: none; /* stop resizing */
-      text-align: center;
+    #micLang {
+      width: 60%;
+      display: inline-block;
+      margin-bottom: 10px;
     }
     #output {
+      position: relative;
       margin: 20px auto 0 auto;
       background: #f0f0f0;
       padding: 15px;
@@ -49,6 +60,16 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
+    }
+    #speakOutputBtn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #4CAF50;
     }
     button:active {
       transform: scale(0.97);
@@ -61,27 +82,6 @@
       margin-top: 15px;
       font-size: 0.9em;
       color: gray;
-    }
-
-    /* Mic dropdown smaller */
-    #micLang {
-      width: 60%;
-      display: inline-block;
-      margin: 10px auto;
-    }
-
-    /* Speak Output Button */
-    #speakOutputBtn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      border-radius: 50%;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      cursor: pointer;
-      font-size: 18px;
     }
   </style>
 </head>
@@ -118,16 +118,16 @@
       <option value="ar-SA">Arabic</option>
     </select>
 
-    <button id="translateBtn" onclick="translateText()">Translate</button>
+    <button id="translateBtn">Translate</button>
     <button id="micButton">🎤 Speak</button>
 
-    <div id="output">Translation will appear here...</div>
-
-    <!-- Speak Output Button -->
-    <button id="speakOutputBtn">🔊</button>
+    <div id="output">
+      Translation will appear here...
+      <button id="speakOutputBtn">🔊</button>
+    </div>
 
     <footer>Made by Ahmed Khan</footer>
-    <footer>Version 1.14</footer>
+    <footer>Version 1.15</footer>
   </div>
 
   <!-- Link to external JS -->

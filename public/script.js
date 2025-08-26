@@ -1,4 +1,27 @@
-// Translate using backend endpoint
+// Grammar correction using LanguageTool API
+async function correctGrammar(text) {
+  try {
+    const response = await fetch('https://api.languagetoolplus.com/v2/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        text: text,
+        language: 'en-US',
+        enabledOnly: 'false'
+      })
+    });
+    const data = await response.json();
+    if (data.matches && data.matches.length > 0) {
+      return data.matches[0].replacements[0]?.value || text;
+    }
+    return text;
+  } catch (error) {
+    console.error('Grammar correction failed:', error);
+    return text;
+  }
+}
+
+// Translate function using LibreTranslate
 async function translateText() {
   const btn = document.getElementById("translateBtn");
   btn.classList.add("pressed");
@@ -13,11 +36,18 @@ async function translateText() {
     return;
   }
 
+  const correctedText = await correctGrammar(inputText);
+
   try {
-    const response = await fetch("/translate", {
+    const response = await fetch("https://libretranslate.de/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: inputText, source: fromLang, target: toLang })
+      body: JSON.stringify({
+        q: correctedText,
+        source: fromLang,
+        target: toLang,
+        format: "text"
+      })
     });
     const data = await response.json();
     document.getElementById("output").innerText = data.translatedText;
@@ -28,22 +58,17 @@ async function translateText() {
   }
 }
 
-// Microphone speech recognition
+// Microphone input
 const micButton = document.getElementById("micButton");
 let recognition;
-
 if ('webkitSpeechRecognition' in window) {
   recognition = new webkitSpeechRecognition();
   recognition.continuous = false;
   recognition.interimResults = false;
-
-  recognition.onresult = function(event) {
+  recognition.onresult = event => {
     document.getElementById("inputText").value = event.results[0][0].transcript;
   };
-
-  recognition.onerror = function() {
-    alert("Speech recognition error");
-  };
+  recognition.onerror = () => alert("Speech recognition error");
 } else {
   micButton.disabled = true;
   micButton.innerText = "🎤 Not supported";
@@ -53,7 +78,6 @@ micButton.addEventListener("click", () => {
   if (recognition) {
     micButton.classList.add("pressed");
     recognition.lang = document.getElementById("micLang").value;
-
     recognition.start();
     micButton.innerText = "🎤 Listening...";
     recognition.onend = () => {
@@ -63,26 +87,14 @@ micButton.addEventListener("click", () => {
   }
 });
 
-// Speak Output Button
-const speakBtn = document.getElementById("speakOutputBtn");
-
-speakBtn.addEventListener("click", () => {
+// Speak output
+const speakOutputBtn = document.getElementById("speakOutputBtn");
+speakOutputBtn.addEventListener("click", () => {
   const text = document.getElementById("output").innerText;
-  if (!text || text === "Translation will appear here..." || text.startsWith("Error")) return;
-
+  if (!text || !('speechSynthesis' in window)) return;
   const utterance = new SpeechSynthesisUtterance(text);
-  const toLang = document.getElementById("toLang").value;
-  if (toLang === 'ar') {
-    utterance.lang = 'ar-SA';
-  } else if (toLang === 'en') {
-    utterance.lang = 'en-US';
-  } else if (toLang === 'es') {
-    utterance.lang = 'es-ES';
-  } else if (toLang === 'de') {
-    utterance.lang = 'de-DE';
-  } else if (toLang === 'fr') {
-    utterance.lang = 'fr-FR';
-  }
   speechSynthesis.speak(utterance);
 });
 
+// Add event listener for translate button
+document.getElementById("translateBtn").addEventListener("click", translateText);
