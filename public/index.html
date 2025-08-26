@@ -2,65 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LingGo Translator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lingo Translate</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+    button, select {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h1>English ↔ French Translator</h1>
+  <h1>🌍 Lingo Translate</h1>
 
-  <textarea id="inputText" rows="4" cols="50" placeholder="Type something..."></textarea>
-  <br><br>
+  <!-- Input box -->
+  <textarea id="text" placeholder="Type or speak something..."></textarea><br>
 
-  <select id="sourceLang">
-    <option value="en">English</option>
-    <option value="fr">French</option>
+  <!-- Language selector for microphone -->
+  <label for="speechLang">🎤 Speak in: </label>
+  <select id="speechLang">
+    <option value="en-US">English</option>
+    <option value="fr-FR">Français</option>
   </select>
-  →
-  <select id="targetLang">
-    <option value="fr">French</option>
-    <option value="en">English</option>
-  </select>
-  <br><br>
 
-  <button id="translateBtn">Translate</button>
-  <p><b>Result:</b> <span id="result"></span></p>
+  <!-- Microphone button -->
+  <button onclick="startListening()">🎤 Speak</button>
+  
+  <!-- Translate button -->
+  <button onclick="translateText()">Translate</button>
 
-  <!-- JavaScript placed at the end to ensure HTML elements are loaded -->
-  <script>
-    // Select the button
-    const button = document.getElementById("translateBtn");
+  <p>Output:</p>
+  <div id="output"></div>
 
-    // Add click event listener
-    button.addEventListener("click", async () => {
-      const text = document.getElementById("inputText").value;
-      const source = document.getElementById("sourceLang").value;
-      const target = document.getElementById("targetLang").value;
-
-      if (!text) {
-        alert("Please type some text to translate!");
-        return;
-      }
-
-      try {
-        const response = await fetch("/translate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, source, target })
-        });
-
-        const data = await response.json();
-        document.getElementById("result").innerText = data.translatedText;
-      } catch (err) {
-        console.error("Error fetching translation:", err);
-        alert("Translation failed. Check console for details.");
-      }
-    });
-  </script>
-</body>
-</html>
-
-<!-- Footer -->
-  <footer style="text-align:center; margin-top:20px; font-size:14px; color:#555;">
+  <footer style="margin-top:50px; font-size:14px; color:gray;">
     Made by Ahmed Khan
   </footer>
+
+  <script>
+    // 🎤 Microphone speech recognition
+    function startListening() {
+      const lang = document.getElementById("speechLang").value;
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = lang;
+      recognition.interimResults = false;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const spokenText = event.results[0][0].transcript;
+        document.getElementById("text").value = spokenText;
+      };
+
+      recognition.onerror = function(event) {
+        alert("Error: " + event.error);
+      };
+    }
+
+    // 🌍 Translation function (example: always English -> French for now)
+    async function translateText() {
+      const text = document.getElementById("text").value;
+      const response = await fetch(`/translate?q=${encodeURIComponent(text)}&langpair=en|fr`);
+      const data = await response.json();
+      document.getElementById("output").innerText = data.responseData.translatedText;
+    }
+  </script>
 </body>
 </html>
