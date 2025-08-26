@@ -24,6 +24,11 @@
       margin-top: 20px;
       font-weight: bold;
     }
+    footer {
+      margin-top: 50px;
+      font-size: 14px;
+      color: gray;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +45,7 @@
   </select>
 
   <!-- Microphone button -->
-  <button onclick="startListening()">🎤 Speak</button>
+  <button id="micBtn" onclick="startListening()">🎤 Speak</button>
   
   <!-- Translate button -->
   <button onclick="translateText()">Translate</button>
@@ -48,33 +53,52 @@
   <p>Output:</p>
   <div id="output"></div>
 
-  <footer style="margin-top:50px; font-size:14px; color:gray;">
-    Made by Ahmed Khan
-  </footer>
+  <footer>Made by Ahmed Khan</footer>
 
   <script>
-    // 🎤 Microphone speech recognition
+    let recognition; 
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    } else {
+      alert("❌ Speech recognition not supported in this browser. Try Chrome.");
+    }
+
     function startListening() {
+      if (!recognition) return;
+
+      const micBtn = document.getElementById("micBtn");
       const lang = document.getElementById("speechLang").value;
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = lang;
       recognition.interimResults = false;
 
       recognition.start();
+      console.log("🎙 Listening started");
+      micBtn.innerText = "🎙 Listening...";
 
       recognition.onresult = function(event) {
         const spokenText = event.results[0][0].transcript;
         document.getElementById("text").value = spokenText;
+        console.log("✅ Heard: " + spokenText);
       };
 
       recognition.onerror = function(event) {
         alert("Error: " + event.error);
+        micBtn.innerText = "🎤 Speak";
+      };
+
+      recognition.onend = function() {
+        micBtn.innerText = "🎤 Speak";
+        console.log("🛑 Listening stopped");
       };
     }
 
-    // 🌍 Translation function (example: always English -> French for now)
+    // 🌍 Translation function
     async function translateText() {
       const text = document.getElementById("text").value;
+      if (!text) {
+        alert("Please enter or speak some text first!");
+        return;
+      }
       const response = await fetch(`/translate?q=${encodeURIComponent(text)}&langpair=en|fr`);
       const data = await response.json();
       document.getElementById("output").innerText = data.responseData.translatedText;
@@ -82,3 +106,4 @@
   </script>
 </body>
 </html>
+
