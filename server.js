@@ -1,4 +1,3 @@
-// Translate function
 async function translateText() {
   const btn = document.getElementById("translateBtn");
   btn.classList.add("pressed");
@@ -16,23 +15,16 @@ async function translateText() {
   try {
     const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(inputText)}&langpair=${fromLang}|${toLang}`);
     const data = await response.json();
-    document.getElementById("output").innerText = data.responseData.translatedText;
-
-    // re-attach speaker icon
-    const outputBox = document.getElementById("output");
-    const speaker = document.createElement("span");
-    speaker.innerText = "🔊";
-    speaker.classList.add("speaker");
-    speaker.id = "speakOutput";
-    speaker.onclick = speakOutput;
-    outputBox.appendChild(speaker);
-
+    document.getElementById("output").childNodes[0].nodeValue = data.responseData.translatedText;
   } catch (error) {
-    document.getElementById("output").innerText = "Error: " + error;
+    document.getElementById("output").childNodes[0].nodeValue = "Error: " + error;
   } finally {
     btn.classList.remove("pressed");
   }
 }
+
+// Translate button
+document.getElementById("translateBtn").addEventListener("click", translateText);
 
 // Speech recognition
 const micButton = document.getElementById("micButton");
@@ -69,16 +61,12 @@ micButton.addEventListener("click", () => {
   }
 });
 
-// Speak output aloud
-function speakOutput() {
-  const text = document.getElementById("output").innerText;
+// Text-to-Speech for output
+document.getElementById("speakBtn").addEventListener("click", () => {
+  const text = document.getElementById("output").childNodes[0].nodeValue;
   if (!text || text.includes("Translation will appear here")) return;
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = document.getElementById("toLang").value;
   speechSynthesis.speak(utterance);
-}
-
-// Event listeners
-document.getElementById("translateBtn").addEventListener("click", translateText);
-document.getElementById("speakOutput").addEventListener("click", speakOutput);
+});
